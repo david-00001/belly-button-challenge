@@ -27,40 +27,70 @@ d3.json(url).then(function(data) {
     });
     
     // Get the top 10 OTUs and corresponding values and labels
-    var otuIds = individualData.otu_ids.slice(0, 10).map(String).reverse();
-    var sampleValues = individualData.sample_values.slice(0, 10).reverse();
-    var otuLabels = individualData.otu_labels.slice(0, 10).reverse();
+    var topTenOTUIds = individualData.otu_ids.slice(0, 10).map(String).reverse();
+    var topTenSampleValues = individualData.sample_values.slice(0, 10).reverse();
+    var topTenOTULabels = individualData.otu_labels.slice(0, 10).reverse();
+    var otuIds = individualData.otu_ids;
+    var sampleValues = individualData.sample_values;
+    var otuLabels = individualData.otu_labels;
+
     
     // Create the bar chart
-    var trace = {
+    var barTrace = {
       type: "bar",
       orientation: "h",
-      x: sampleValues,
-      y: otuIds,
-      text: otuLabels,
-      hovertemplate: "OTU ID: %{y}<br>Sample Value: %{x}<br>%{text}<extra></extra>",
+      x: topTenSampleValues,
+      y: topTenOTUIds,
+      text: topTenOTULabels,
+      hovertemplate: "OTU ID: %{y}<br>Sample Value: %{x}<br>%{text}",
       marker: {
         color: "rgb(58, 200, 225)"
       },
       width: 0.8
     };
     
-    var layout = {
+    var barLayout = {
       title: "Top 10 OTUs",
       xaxis: { title: "Sample Value" },
       yaxis: {
         title: "OTU ID",
-        showticklabels: true, // Show tick labels
-        type: "category", // Set the Y-axis type to "category"
-        automargin: true // Adjust the margins
+        showticklabels: true,
+        type: "category",
+        automargin: true
       },
       margin: { t: 30, l: 150 }
     };
+
+    // Create the bubble chart
+    var bubbleTrace = {
+      type: "scatter",
+      mode:"markers",
+      x: otuIds,
+      y: sampleValues,
+      text: otuLabels,
+      hovertemplate: "OTU ID: %{x}<br>Sample Value: %{y}<br>%{text}",
+      marker: {
+        size: sampleValues.map(value => value/3),
+        sizemode:"diameter",
+        sizeref: 0.5,
+        color: otuIds,
+        colorscale: "Viridis"
+      }
+    };
     
-    var chartData = [trace];
-    Plotly.newPlot("bar", chartData, layout);
+    var bubbleLayout = {
+      title: "All OTUs",
+      xaxis: { title: "OTU ID"},
+      yaxis: { title: "Sample Value"},
+      margin: { t: 30, l: 150 }
+    };
+    
+    var barChartData = [barTrace];
+    var bubbleChartData = [bubbleTrace];
+    Plotly.newPlot("bar", barChartData, barLayout);
+    Plotly.newPlot("bubble", bubbleChartData, bubbleLayout);
   }
     
-    // Initialize the page with the first name in the dropdown
+  // Initialize the page with the first name in the dropdown
   optionChanged(names[0]);
 });
