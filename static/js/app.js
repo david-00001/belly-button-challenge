@@ -1,13 +1,13 @@
-// URL to the sample data
+// URL to sample data
 const url = "https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json"
 
-  // Fetch the JSON data
+// Fetch JSON data
 d3.json(url).then(function(data) {
 
-  // Retrieve the names array for dropdown options
+  // Retrieve names array for dropdown
   var names = data.names;
 
-  // Populate the dropdown menu with names
+  // Populate the dropdown menu
   var dropdown = d3.select("#selDataset");
   names.forEach(function(name) {
     dropdown.append("option").text(name).property("value", name);
@@ -15,7 +15,7 @@ d3.json(url).then(function(data) {
       
   // Function to handle changes in the dropdown selection
   function optionChanged(selectedName) {
-    // Filter the data for the selected individual
+    // Filter data for selected individual
     var individualData = data.samples.find(function(sample) {
       return sample.id === selectedName;
     });
@@ -26,7 +26,7 @@ d3.json(url).then(function(data) {
       optionChanged(selectedName);
     });
     
-    // Get the top 10 OTUs and corresponding values and labels
+    // Get the data for both bar and bubble charts
     var topTenOTUIds = individualData.otu_ids.slice(0, 10).map(String).reverse();
     var topTenSampleValues = individualData.sample_values.slice(0, 10).reverse();
     var topTenOTULabels = individualData.otu_labels.slice(0, 10).reverse();
@@ -49,6 +49,7 @@ d3.json(url).then(function(data) {
       width: 0.8
     };
     
+    // Layout for bar chart
     var barLayout = {
       title: "Top 10 OTUs",
       xaxis: { title: "Sample Value" },
@@ -78,17 +79,32 @@ d3.json(url).then(function(data) {
       }
     };
     
+    // Layout for bubble chart
     var bubbleLayout = {
-      title: "All OTUs",
+      title: "All OTUs for Selected Individual",
       xaxis: { title: "OTU ID"},
       yaxis: { title: "Sample Value"},
       margin: { t: 30, l: 150 }
     };
     
+    // Create both charts
     var barChartData = [barTrace];
     var bubbleChartData = [bubbleTrace];
     Plotly.newPlot("bar", barChartData, barLayout);
     Plotly.newPlot("bubble", bubbleChartData, bubbleLayout);
+
+    // Get metadata for the selected individual
+    var metadata = data.metadata.find(function(meta) {
+      return meta.id.toString() === selectedName;
+    });
+
+    // Display demographic metadata
+    var demographicInfo = d3.select("#sample-metadata");
+    demographicInfo.html("");
+
+    Object.entries(metadata).forEach(function([key, value]) {
+      demographicInfo.append("p").text(`${key}: ${value}`);
+    });
   }
     
   // Initialize the page with the first name in the dropdown
